@@ -1,0 +1,1302 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>MOVIXP - Smart Parking</title>
+  <style>
+    :root{
+      --bg:#fbf8f2;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:rgba(17,24,39,.10);
+      --shadow: 0 14px 40px rgba(17,24,39,.08);
+
+      --brand:#6d28d9;
+      --brand2:#10b981;
+      --hot:#f97316;
+      --blue:#2563eb;
+      --danger:#ef4444;
+
+      --r:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", Arial;
+      color:var(--text);
+      background:
+        radial-gradient(900px 520px at 18% 8%, rgba(109,40,217,.10), transparent 55%),
+        radial-gradient(900px 520px at 90% 16%, rgba(16,185,129,.10), transparent 55%),
+        radial-gradient(900px 520px at 60% 100%, rgba(249,115,22,.10), transparent 55%),
+        var(--bg);
+      min-height:100vh;
+    }
+
+    .app{
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display:flex;
+      flex-direction:column;
+      padding-bottom: 90px;
+    }
+
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 14px 14px 10px;
+      backdrop-filter: blur(10px);
+    }
+    .topbar-inner{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.78);
+      border-radius: 20px;
+      padding: 12px 12px;
+      box-shadow: var(--shadow);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      min-width: 0;
+    }
+    .logo{
+      width:36px;height:36px;border-radius:14px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: 0 12px 22px rgba(109,40,217,.16);
+      flex:0 0 auto;
+    }
+    .brand .txt{min-width:0}
+    .brand .txt b{display:block; font-size:14px; letter-spacing:.2px}
+    .brand .txt span{display:block; font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .pill{
+      border:1px solid rgba(109,40,217,.25);
+      background: rgba(109,40,217,.08);
+      color: var(--brand);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    main{padding: 8px 14px 0; flex:1}
+
+    .card{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.92);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-h{
+      padding: 14px 14px 10px;
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .card-h h2{margin:0; font-size:14px}
+    .card-h small{color:var(--muted)}
+    .card-b{padding: 14px}
+
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    .field label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+    .field input,.field select{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      outline:none;
+    }
+    .row{display:flex; gap:10px}
+
+    .btn{
+      border:1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 11px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      cursor:pointer;
+      transition:.12s ease;
+      box-shadow: 0 10px 20px rgba(17,24,39,.05);
+    }
+    .btn:active{transform: scale(.985)}
+    .btn-primary{
+      border-color: rgba(109,40,217,.22);
+      background: linear-gradient(135deg, rgba(109,40,217,.95), rgba(37,99,235,.90));
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(37,99,235,.18);
+    }
+    .btn-ok{
+      border-color: rgba(16,185,129,.25);
+      background: linear-gradient(135deg, rgba(16,185,129,.95), rgba(34,197,94,.88));
+      color: #fff;
+      box-shadow: 0 16px 30px rgba(16,185,129,.18);
+    }
+    .btn-hot{
+      border-color: rgba(249,115,22,.25);
+      background: linear-gradient(135deg, rgba(249,115,22,.95), rgba(245,158,11,.90));
+      color:#fff;
+      box-shadow: 0 16px 30px rgba(249,115,22,.18);
+    }
+    .btn-ghost{background: rgba(255,255,255,.65)}
+    .btn-danger{
+      border-color: rgba(239,68,68,.25);
+      background: rgba(239,68,68,.10);
+      color: #b91c1c;
+      box-shadow:none;
+    }
+
+    .hint{color:var(--muted); font-size:12px; line-height:1.45; margin:10px 2px 0}
+
+    .list{display:grid; gap:10px; margin-top: 12px}
+    .item{
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.90);
+      border-radius: 16px;
+      padding: 12px;
+      display:flex; gap:10px; align-items:stretch; justify-content:space-between;
+    }
+    .item .left{flex:1; min-width:0}
+    .item .name{font-weight:950; font-size:13px}
+    .item .meta{color:var(--muted); font-size:12px; margin-top:6px; display:flex; flex-wrap:wrap; gap:8px}
+    .badge{
+      font-size:11px; padding: 4px 9px; border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(17,24,39,.03);
+      color: var(--muted);
+      display:inline-flex; align-items:center; gap:6px;
+    }
+    .badge.ok{border-color: rgba(16,185,129,.28); color:#047857; background: rgba(16,185,129,.10)}
+    .badge.warn{border-color: rgba(249,115,22,.28); color:#9a3412; background: rgba(249,115,22,.10)}
+    .badge.blue{border-color: rgba(37,99,235,.25); color:#1d4ed8; background: rgba(37,99,235,.10)}
+    .price{font-weight:950; color: var(--brand); font-size:13px; white-space:nowrap}
+    .divider{height:1px; background: var(--line); margin: 12px 0}
+    .empty{
+      border: 1px dashed rgba(17,24,39,.18);
+      background: rgba(255,255,255,.70);
+      border-radius: 16px;
+      padding: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .mapbox{
+      border:1px solid var(--line);
+      border-radius: 18px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      background:#fff;
+    }
+    .mapimg{width:100%; display:block}
+
+    .nav{
+      position: fixed;
+      left:0; right:0; bottom:0;
+      padding: 10px 12px 18px;
+      background: linear-gradient(to top, rgba(251,248,242,.96), rgba(251,248,242,.70), transparent);
+      z-index: 80;
+    }
+    .nav-inner{
+      max-width: 430px;
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: repeat(5,1fr);
+      gap:10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 10px;
+    }
+    .tab{
+      text-decoration:none;
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      padding: 10px 6px;
+      border-radius: 16px;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-weight: 950;
+      font-size: 11px;
+      user-select:none;
+    }
+    .tab.active{
+      background: rgba(109,40,217,.08);
+      border-color: rgba(109,40,217,.18);
+      color: var(--brand);
+    }
+    .icon{font-size:16px; line-height:1}
+
+    .sheet{
+      position: fixed; inset:0;
+      display:none;
+      background: rgba(17,24,39,.35);
+      align-items:flex-end;
+      z-index: 120;
+    }
+    .sheet.show{display:flex}
+    .sheet-card{
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      border-radius: 22px 22px 0 0;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.96);
+      box-shadow: var(--shadow);
+      padding: 12px 14px 16px;
+    }
+    .sheet-head{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom: 10px;
+    }
+    .sheet-head b{font-size:14px}
+    table{
+      width:100%;
+      border-collapse: collapse;
+      border:1px solid var(--line);
+      border-radius: 16px;
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    th,td{padding:10px; font-size:12px; text-align:left; border-bottom:1px solid var(--line)}
+    th{color:var(--muted); background: rgba(17,24,39,.03)}
+    tr:last-child td{border-bottom:none}
+
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 100px;
+      width: min(430px, calc(100% - 24px));
+      display:none;
+      z-index: 200;
+    }
+    .toast.show{display:block}
+    .toast-inner{
+      border:1px solid rgba(17,24,39,.12);
+      background: rgba(255,255,255,.94);
+      border-radius: 18px;
+      padding: 12px 12px;
+      box-shadow: var(--shadow);
+    }
+    .toast b{display:block; font-size:13px; margin-bottom:4px}
+    .toast p{margin:0; color:var(--muted); font-size:12px; line-height:1.4}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="txt">
+            <b>MOVIXP</b>
+            <span id="topSubtitle">Smart Parking · Bright UI</span>
+          </div>
+        </div>
+        <span class="pill" id="topPill">Home</span>
+      </div>
+    </div>
+
+    <main id="view"></main>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="nav">
+    <div class="nav-inner">
+      <a class="tab" href="#/home" data-tab="home"><span class="icon">⌂</span>首页</a>
+      <a class="tab" href="#/parking" data-tab="parking"><span class="icon">P</span>停车</a>
+      <a class="tab" href="#/map" data-tab="map"><span class="icon">▣</span>地图</a>
+      <a class="tab" href="#/food" data-tab="food"><span class="icon">≋</span>外卖</a>
+      <a class="tab" href="#/orders" data-tab="orders"><span class="icon">🧾</span>订单</a>
+    </div>
+  </div>
+
+  <!-- Sheet -->
+  <div class="sheet" id="sheet">
+    <div class="sheet-card" role="dialog" aria-modal="true">
+      <div class="sheet-head">
+        <b id="sheetTitle">—</b>
+        <button class="btn btn-ghost" id="sheetClose">关闭</button>
+      </div>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" aria-live="polite">
+    <div class="toast-inner">
+      <b id="toastT">—</b>
+      <p id="toastD">—</p>
+    </div>
+  </div>
+
+<script>
+  const $ = (id)=>document.getElementById(id);
+  const view = $("view");
+
+  const PARKING_DB = [
+    { id:"P001", name:"KLCC Mall Parking", addr:"Kuala Lumpur City Centre", type:"mall", distanceKm:0.6, hourly:4.50, available:18, ev:true, lat:3.1579, lng:101.7123 },
+    { id:"P002", name:"Bukit Bintang Street Zone", addr:"Jalan Sultan Ismail", type:"street", distanceKm:1.2, hourly:3.00, available:9,  ev:false, lat:3.1466, lng:101.7101 },
+    { id:"P003", name:"Mid Valley Megamall", addr:"Lingkaran Syed Putra", type:"mall", distanceKm:5.5, hourly:3.80, available:25, ev:true, lat:3.1183, lng:101.6769 },
+    { id:"P004", name:"KL Sentral Park & Ride", addr:"KL Sentral Station", type:"station", distanceKm:3.9, hourly:2.60, available:12, ev:false, lat:3.1335, lng:101.6860 },
+  ];
+
+  const FOOD_DB = [
+    { id:"F001", name:"Rice Bowl Express", tag:"Fast", etaMin:25, fee:3.00, min:12.00, rating:4.6 },
+    { id:"F002", name:"Noodle Lab", tag:"Noodles", etaMin:30, fee:2.00, min:10.00, rating:4.5 },
+    { id:"F003", name:"Burger & Grill", tag:"Grill", etaMin:35, fee:4.00, min:15.00, rating:4.4 },
+    { id:"F004", name:"Salad & Wrap", tag:"Light", etaMin:20, fee:2.50, min:11.00, rating:4.7 },
+  ];
+
+  const LS_ORDERS = "movixp_orders_v2";
+  const LS_FOOD   = "movixp_food_v1";
+
+  const state = {
+    parking: { q:"", type:"any", start:null, end:null, plate:"", selected:null, pricing:null },
+    map: { focusedSpotId: null },
+    food: { q:"", selectedStore:null, cart:[], deliveryAddr:"", pricing:null },
+  };
+
+  function nowPlusMin(m){
+    const d = new Date(Date.now()+m*60000);
+    return toLocalInput(d);
+  }
+  function toLocalInput(d){
+    const pad=n=>String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function parseDT(v){
+    if(!v) return null;
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function fmtDT(d){
+    const pad=n=>String(n).padStart(2,"0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function hoursBetween(a,b){
+    const h=(b-a)/3600000;
+    return Math.max(1, Math.ceil(h*2)/2);
+  }
+  function escapeHTML(s){
+    return String(s)
+      .replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+  function toast(t,d){
+    $("toastT").textContent=t;
+    $("toastD").textContent=d;
+    $("toast").classList.add("show");
+    clearTimeout(window.__tt);
+    window.__tt=setTimeout(()=>$("toast").classList.remove("show"),2200);
+  }
+  function loadLS(key){
+    try{ return JSON.parse(localStorage.getItem(key)||"[]"); }catch(e){ return []; }
+  }
+  function saveLS(key, arr){
+    localStorage.setItem(key, JSON.stringify(arr));
+  }
+
+  function setTop(title, subtitle){
+    $("topPill").textContent=title;
+    $("topSubtitle").textContent=subtitle;
+  }
+  function setActiveTab(key){
+    document.querySelectorAll(".tab").forEach(a=>{
+      a.classList.toggle("active", a.dataset.tab===key);
+    });
+  }
+
+  function openSheet(title, html){
+    $("sheetTitle").textContent=title;
+    $("sheetBody").innerHTML=html;
+    $("sheet").classList.add("show");
+  }
+  function closeSheet(){ $("sheet").classList.remove("show"); }
+  $("sheetClose").addEventListener("click", closeSheet);
+  $("sheet").addEventListener("click",(e)=>{ if(e.target===$("sheet")) closeSheet(); });
+
+  function openNavigationTo(textOrLatLng){
+    const q = encodeURIComponent(textOrLatLng);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+  }
+
+  function parkingPricing(spot){
+    const s=state.parking.start, e=state.parking.end;
+    const hours=hoursBetween(s,e);
+    const base=hours*spot.hourly;
+    const fee=base*0.03+0.30;
+    const disc=(hours>=6)? base*0.05 : 0;
+    const total=Math.max(0, base+fee-disc);
+    return { hours, base, fee, disc, total };
+  }
+  function foodPricing(store, cart){
+    const itemsTotal = cart.reduce((sum,i)=>sum + i.price*i.qty, 0);
+    const service = itemsTotal*0.02;
+    const total = Math.max(0, itemsTotal + store.fee + service);
+    return { itemsTotal, service, delivery: store.fee, total };
+  }
+
+  function saveParkingOrder(order){
+    const arr=loadLS(LS_ORDERS);
+    arr.unshift(order);
+    saveLS(LS_ORDERS, arr);
+  }
+  function saveFoodOrder(order){
+    const arr=loadLS(LS_FOOD);
+    arr.unshift(order);
+    saveLS(LS_FOOD, arr);
+  }
+
+  /* ------------------- Views ------------------- */
+
+  function renderHome(){
+    setTop("Home","明亮简洁 · 停车 + 外卖 + 导航");
+    setActiveTab("home");
+
+    const parkingOrders = loadLS(LS_ORDERS);
+    const foodOrders = loadLS(LS_FOOD);
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <h2>MOVIXP Smart Parking</h2>
+            <small>作业原型：无登录，支付为模拟</small>
+          </div>
+          <span class="badge blue">Bright</span>
+        </div>
+        <div class="card-b">
+          <div class="empty">
+            3条演示路径：<br/>
+            1) 停车：找车位 → 预约 → 支付 → 导航<br/>
+            2) 地图：查看停车点 → 一键导航<br/>
+            3) 外卖：选店 → 下单 → 支付（模拟）
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button class="btn btn-primary" id="goParking" style="flex:1">去预约车位</button>
+            <button class="btn btn-hot" id="goFood" style="flex:1">点外卖</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="list">
+            <div class="item">
+              <div class="left">
+                <div class="name">停车订单</div>
+                <div class="meta">
+                  <span class="badge ok">${parkingOrders.length} 单</span>
+                  <span>本地保存</span>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+                <button class="btn btn-ghost" id="viewP">查看</button>
+              </div>
+            </div>
+
+            <div class="item">
+              <div class="left">
+                <div class="name">外卖订单</div>
+                <div class="meta">
+                  <span class="badge ok">${foodOrders.length} 单</span>
+                  <span>本地保存</span>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+                <button class="btn btn-ghost" id="viewF">查看</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <button class="btn btn-primary" id="goOrders" style="width:100%">去订单页（合并）</button>
+
+          <p class="hint">导航会打开 Google Maps 新标签页。</p>
+        </div>
+      </div>
+    `;
+
+    $("goParking").onclick=()=>location.hash="#/parking";
+    $("goFood").onclick=()=>location.hash="#/food";
+    $("goOrders").onclick=()=>location.hash="#/orders";
+
+    $("viewP").onclick=()=>openParkingOrdersSheet();
+    $("viewF").onclick=()=>openFoodOrdersSheet();
+  }
+
+  function renderParking(){
+    setTop("Parking","预约车位 · 支付 · 一键导航");
+    setActiveTab("parking");
+
+    const startVal = state.parking.start ? toLocalInput(state.parking.start) : nowPlusMin(20);
+    const endVal   = state.parking.end   ? toLocalInput(state.parking.end)   : nowPlusMin(140);
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="card-h">
+          <h2>找车位</h2>
+          <small>明亮风移动端</small>
+        </div>
+        <div class="card-b">
+          <div class="grid2">
+            <div class="field">
+              <label>地点关键词</label>
+              <input id="pQ" placeholder="例如：KLCC / KL" value="${escapeHTML(state.parking.q||"")}" />
+            </div>
+            <div class="field">
+              <label>类型</label>
+              <select id="pType">
+                <option value="any">不限</option>
+                <option value="mall">商场</option>
+                <option value="street">路边</option>
+                <option value="station">车站</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>开始时间</label>
+              <input id="pStart" type="datetime-local" value="${startVal}" />
+            </div>
+            <div class="field">
+              <label>结束时间</label>
+              <input id="pEnd" type="datetime-local" value="${endVal}" />
+            </div>
+          </div>
+
+          <div class="field" style="margin-top:10px">
+            <label>车牌（可选）</label>
+            <input id="pPlate" placeholder="ABC1234" value="${escapeHTML(state.parking.plate||"")}" />
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <button class="btn btn-primary" id="pFind" style="flex:2">搜索</button>
+            <button class="btn btn-ghost" id="pReset" style="flex:1">重置</button>
+          </div>
+
+          <div class="divider"></div>
+          <div id="pResults" class="list"></div>
+
+          <p class="hint">“导航”可直接打开 Google Maps；“预约”会弹出确认/支付。</p>
+        </div>
+      </div>
+    `;
+
+    $("pType").value = state.parking.type || "any";
+
+    state.parking.start = parseDT(startVal);
+    state.parking.end   = parseDT(endVal);
+
+    $("pFind").onclick=()=>{
+      state.parking.q = $("pQ").value.trim();
+      state.parking.type = $("pType").value;
+      state.parking.plate = $("pPlate").value.trim();
+      state.parking.start = parseDT($("pStart").value);
+      state.parking.end   = parseDT($("pEnd").value);
+
+      if(!state.parking.start || !state.parking.end || state.parking.end<=state.parking.start){
+        toast("时间不对","结束时间必须晚于开始时间。");
+        return;
+      }
+      renderParkingResults();
+    };
+
+    $("pReset").onclick=()=>{
+      state.parking = { q:"", type:"any", start:null, end:null, plate:"", selected:null, pricing:null };
+      toast("已重置","重新输入再搜索。");
+      renderParking();
+    };
+
+    renderParkingResults();
+  }
+
+  function renderParkingResults(){
+    const wrap = $("pResults");
+    const q = (state.parking.q||"").toLowerCase();
+    const type = state.parking.type;
+
+    let arr = PARKING_DB.filter(s=>{
+      const hitLoc = !q || s.name.toLowerCase().includes(q) || s.addr.toLowerCase().includes(q);
+      const hitType = (type==="any") || (s.type===type);
+      return hitLoc && hitType;
+    });
+
+    if(arr.length===0){
+      wrap.innerHTML = `<div class="empty">没有找到匹配车位。试试把类型改成“不限”或换关键词。</div>`;
+      return;
+    }
+
+    wrap.innerHTML = arr.map(spot=>{
+      const badge =
+        spot.available>=15 ? `<span class="badge ok">余位 ${spot.available}</span>` :
+        spot.available>=7  ? `<span class="badge warn">余位 ${spot.available}</span>` :
+                             `<span class="badge warn">紧张 ${spot.available}</span>`;
+      return `
+        <div class="item">
+          <div class="left">
+            <div class="name">${escapeHTML(spot.name)}</div>
+            <div class="meta">
+              <span class="badge blue">${spot.type.toUpperCase()}</span>
+              ${badge}
+              ${spot.ev ? `<span class="badge ok">EV</span>` : `<span class="badge">No EV</span>`}
+              <span>${escapeHTML(spot.addr)}</span>
+              <span>• ${spot.distanceKm} km</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:space-between">
+            <div class="price">RM ${spot.hourly.toFixed(2)}/h</div>
+            <div class="row" style="gap:8px">
+              <button class="btn btn-ghost" data-nav="${spot.id}">导航</button>
+              <button class="btn btn-ok" data-book="${spot.id}">预约</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    wrap.querySelectorAll("button[data-nav]").forEach(btn=>{
+      btn.onclick=()=>{
+        const spot = PARKING_DB.find(x=>x.id===btn.getAttribute("data-nav"));
+        openNavigationTo(`${spot.name} ${spot.addr}`);
+      };
+    });
+
+    wrap.querySelectorAll("button[data-book]").forEach(btn=>{
+      btn.onclick=()=>{
+        const spot = PARKING_DB.find(x=>x.id===btn.getAttribute("data-book"));
+        if(!state.parking.start || !state.parking.end || state.parking.end<=state.parking.start){
+          toast("先选时间","设置开始/结束时间后再预约。");
+          return;
+        }
+        state.parking.selected = spot;
+        state.parking.pricing = parkingPricing(spot);
+        openParkingCheckoutSheet();
+      };
+    });
+  }
+
+  function openParkingCheckoutSheet(){
+    const spot = state.parking.selected;
+    const p = state.parking.pricing;
+
+    openSheet("确认并支付", `
+      <div class="item" style="margin-bottom:10px">
+        <div class="left">
+          <div class="name">${escapeHTML(spot.name)}</div>
+          <div class="meta">
+            <span class="badge blue">${spot.type.toUpperCase()}</span>
+            <span>${escapeHTML(spot.addr)}</span>
+          </div>
+        </div>
+        <div class="price">RM ${p.total.toFixed(2)}</div>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <label>开始</label>
+          <input value="${fmtDT(state.parking.start)}" disabled />
+        </div>
+        <div class="field">
+          <label>结束</label>
+          <input value="${fmtDT(state.parking.end)}" disabled />
+        </div>
+      </div>
+
+      <table>
+        <thead><tr><th>项目</th><th>金额</th></tr></thead>
+        <tbody>
+          <tr><td>时长</td><td>${p.hours} h</td></tr>
+          <tr><td>基础费用</td><td>RM ${p.base.toFixed(2)}</td></tr>
+          <tr><td>平台服务费</td><td>RM ${p.fee.toFixed(2)}</td></tr>
+          <tr><td>折扣</td><td>- RM ${p.disc.toFixed(2)}</td></tr>
+          <tr><td><b>合计</b></td><td><b>RM ${p.total.toFixed(2)}</b></td></tr>
+        </tbody>
+      </table>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>支付方式（模拟）</label>
+        <select id="pPayMethod">
+          <option value="card">银行卡</option>
+          <option value="ewallet">电子钱包</option>
+          <option value="online">Online Banking</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-primary" id="pPay" style="flex:2">支付</button>
+        <button class="btn btn-ghost" id="pCancel" style="flex:1">取消</button>
+      </div>
+
+      <p class="hint">支付成功后可在“地图”页聚焦该停车点并一键导航。</p>
+    `);
+
+    $("pCancel").onclick=closeSheet;
+    $("pPay").onclick=()=>{
+      const method = document.getElementById("pPayMethod").value;
+      const order = {
+        id: "MXP-" + Math.random().toString(16).slice(2,8).toUpperCase() + "-" + Date.now().toString().slice(-5),
+        createdAt: new Date().toISOString(),
+        spotId: spot.id,
+        spotName: spot.name,
+        addr: spot.addr,
+        start: state.parking.start.toISOString(),
+        end: state.parking.end.toISOString(),
+        hours: p.hours,
+        hourly: spot.hourly,
+        total: p.total,
+        method,
+        plate: state.parking.plate || "",
+        status: "PAID"
+      };
+      saveParkingOrder(order);
+      state.map.focusedSpotId = spot.id;
+      openParkingReceiptSheet(order);
+    };
+  }
+
+  function openParkingReceiptSheet(order){
+    openSheet("收据", `
+      <div class="empty" style="border-style:solid">
+        <b>支付成功（模拟）</b><br/>
+        订单号：<b>${escapeHTML(order.id)}</b><br/>
+        停车点：${escapeHTML(order.spotName)}<br/>
+        时间：${fmtDT(new Date(order.start))} → ${fmtDT(new Date(order.end))}<br/>
+        合计：<b>RM ${order.total.toFixed(2)}</b>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-primary" id="toMap" style="flex:1">去地图</button>
+        <button class="btn btn-ghost" id="navNow" style="flex:1">立即导航</button>
+      </div>
+    `);
+
+    $("toMap").onclick=()=>{ closeSheet(); location.hash="#/map"; };
+    $("navNow").onclick=()=>openNavigationTo(`${order.spotName} ${order.addr}`);
+  }
+
+  function renderMap(){
+    setTop("Map","图片地图占位 · 一键导航");
+    setActiveTab("map");
+
+    const focusId = state.map.focusedSpotId;
+    const focusSpot = focusId ? PARKING_DB.find(x=>x.id===focusId) : null;
+
+    const mapSVG = encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="900" height="520">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="rgba(37,99,235,0.20)"/>
+            <stop offset="1" stop-color="rgba(16,185,129,0.20)"/>
+          </linearGradient>
+        </defs>
+        <rect width="900" height="520" fill="url(#g)"/>
+        <g fill="none" stroke="rgba(17,24,39,0.18)" stroke-width="6">
+          <path d="M70 120 C 220 70, 340 180, 470 120 S 720 130, 840 70" />
+          <path d="M90 420 C 240 360, 320 440, 470 400 S 740 410, 860 340" />
+          <path d="M210 80 L 240 480" />
+          <path d="M520 40 L 500 500" />
+        </g>
+        <g font-family="Arial" font-size="26" fill="rgba(17,24,39,0.65)">
+          <text x="40" y="55">MOVIXP Map Placeholder</text>
+          <text x="40" y="90">（作业：用图片代替真实地图）</text>
+        </g>
+        <g>
+          <circle cx="220" cy="160" r="16" fill="rgba(109,40,217,0.95)"/>
+          <circle cx="430" cy="220" r="16" fill="rgba(249,115,22,0.95)"/>
+          <circle cx="640" cy="150" r="16" fill="rgba(16,185,129,0.95)"/>
+          <circle cx="560" cy="380" r="16" fill="rgba(37,99,235,0.95)"/>
+        </g>
+      </svg>
+    `);
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="card-h">
+          <h2>停车点地图</h2>
+          <small>点击“导航”打开 Google Maps</small>
+        </div>
+        <div class="card-b">
+          <div class="mapbox">
+            <img class="mapimg" alt="Map placeholder" src="data:image/svg+xml,${mapSVG}">
+          </div>
+
+          <div class="divider"></div>
+
+          ${focusSpot ? `
+            <div class="empty" style="border-style:solid">
+              <b>已聚焦：</b>${escapeHTML(focusSpot.name)}<br/>
+              来自你最近一次支付（演示效果）
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn btn-primary" id="navFocus" style="flex:1">导航到该点</button>
+              <button class="btn btn-ghost" id="clearFocus" style="flex:1">清除聚焦</button>
+            </div>
+            <div class="divider"></div>
+          ` : `
+            <div class="empty">
+              这是地图占位图。你后续可以接 Google Maps / Mapbox 来替换。
+            </div>
+            <div class="divider"></div>
+          `}
+
+          <div class="list" id="mapList"></div>
+        </div>
+      </div>
+    `;
+
+    if(focusSpot){
+      $("navFocus").onclick=()=>openNavigationTo(`${focusSpot.name} ${focusSpot.addr}`);
+      $("clearFocus").onclick=()=>{
+        state.map.focusedSpotId=null;
+        toast("已清除","聚焦已取消。");
+        renderMap();
+      };
+    }
+
+    $("mapList").innerHTML = PARKING_DB.map(s=>{
+      const isFocus = focusSpot && focusSpot.id===s.id;
+      const badge =
+        s.available>=15 ? `<span class="badge ok">余位 ${s.available}</span>` :
+        s.available>=7  ? `<span class="badge warn">余位 ${s.available}</span>` :
+                          `<span class="badge warn">紧张 ${s.available}</span>`;
+      return `
+        <div class="item">
+          <div class="left">
+            <div class="name">${escapeHTML(s.name)} ${isFocus ? `<span class="badge blue">FOCUS</span>` : ""}</div>
+            <div class="meta">
+              <span class="badge blue">${s.type.toUpperCase()}</span>
+              ${badge}
+              <span>${escapeHTML(s.addr)}</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+            <button class="btn btn-ghost" data-map-nav="${s.id}">导航</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    document.querySelectorAll("button[data-map-nav]").forEach(btn=>{
+      btn.onclick=()=>{
+        const spot = PARKING_DB.find(x=>x.id===btn.getAttribute("data-map-nav"));
+        openNavigationTo(`${spot.name} ${spot.addr}`);
+      };
+    });
+  }
+
+  function renderFood(){
+    setTop("Food","外卖（演示）· 下单 + 支付");
+    setActiveTab("food");
+
+    const q = state.food.q || "";
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="card-h">
+          <h2>外卖</h2>
+          <small>无需登录</small>
+        </div>
+        <div class="card-b">
+          <div class="field">
+            <label>搜索店铺</label>
+            <input id="fQ" placeholder="例如：noodle / burger" value="${escapeHTML(q)}"/>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn btn-hot" id="fFind" style="flex:2">搜索</button>
+            <button class="btn btn-ghost" id="fOrders" style="flex:1">订单</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <div id="fStores" class="list"></div>
+
+          <p class="hint">外卖模块为作业演示：下单/支付会生成订单并保存在本地。</p>
+        </div>
+      </div>
+    `;
+
+    $("fFind").onclick=()=>{
+      state.food.q = $("fQ").value.trim();
+      renderFoodStores();
+    };
+    $("fOrders").onclick=()=>openFoodOrdersSheet();
+
+    renderFoodStores();
+  }
+
+  function renderFoodStores(){
+    const wrap = $("fStores");
+    const q=(state.food.q||"").toLowerCase();
+    const arr = FOOD_DB.filter(s=>!q || s.name.toLowerCase().includes(q) || s.tag.toLowerCase().includes(q));
+
+    if(arr.length===0){
+      wrap.innerHTML = `<div class="empty">没有找到店铺。换个关键词试试。</div>`;
+      return;
+    }
+
+    wrap.innerHTML = arr.map(s=>`
+      <div class="item">
+        <div class="left">
+          <div class="name">${escapeHTML(s.name)}</div>
+          <div class="meta">
+            <span class="badge blue">${escapeHTML(s.tag)}</span>
+            <span class="badge ok">评分 ${s.rating}</span>
+            <span>预计 ${s.etaMin} 分钟</span>
+            <span>配送 RM ${s.fee.toFixed(2)}</span>
+            <span>起送 RM ${s.min.toFixed(2)}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+          <button class="btn btn-hot" data-store="${s.id}">选这家</button>
+        </div>
+      </div>
+    `).join("");
+
+    wrap.querySelectorAll("button[data-store]").forEach(btn=>{
+      btn.onclick=()=>{
+        const store = FOOD_DB.find(x=>x.id===btn.dataset.store);
+        state.food.selectedStore = store;
+        state.food.cart = [
+          { name:"Set A", price: 12.00, qty: 1 },
+          { name:"Drink", price: 3.50, qty: 1 },
+        ];
+        state.food.deliveryAddr = "Your location (demo)";
+        openFoodCheckoutSheet();
+      };
+    });
+  }
+
+  function openFoodCheckoutSheet(){
+    const store = state.food.selectedStore;
+    const cart = state.food.cart;
+    const pricing = foodPricing(store, cart);
+    state.food.pricing = pricing;
+
+    const itemsHtml = cart.map((i,idx)=>`
+      <div class="item" style="margin-bottom:10px">
+        <div class="left">
+          <div class="name">${escapeHTML(i.name)}</div>
+          <div class="meta">
+            <span>RM ${i.price.toFixed(2)}</span>
+            <span>数量：${i.qty}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost" data-minus="${idx}">-</button>
+          <button class="btn btn-ghost" data-plus="${idx}">+</button>
+        </div>
+      </div>
+    `).join("");
+
+    openSheet("确认外卖订单", `
+      <div class="empty" style="border-style:solid">
+        <b>店铺：</b>${escapeHTML(store.name)}<br/>
+        预计：${store.etaMin} 分钟 • 配送 RM ${store.fee.toFixed(2)}
+      </div>
+
+      <div class="divider"></div>
+
+      ${itemsHtml}
+
+      <div class="field">
+        <label>送达地址（演示）</label>
+        <input id="fAddr" value="${escapeHTML(state.food.deliveryAddr)}" />
+      </div>
+
+      <table>
+        <thead><tr><th>项目</th><th>金额</th></tr></thead>
+        <tbody>
+          <tr><td>商品小计</td><td>RM ${pricing.itemsTotal.toFixed(2)}</td></tr>
+          <tr><td>配送费</td><td>RM ${pricing.delivery.toFixed(2)}</td></tr>
+          <tr><td>服务费</td><td>RM ${pricing.service.toFixed(2)}</td></tr>
+          <tr><td><b>合计</b></td><td><b>RM ${pricing.total.toFixed(2)}</b></td></tr>
+        </tbody>
+      </table>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>支付方式（模拟）</label>
+        <select id="fPayMethod">
+          <option value="ewallet">电子钱包</option>
+          <option value="card">银行卡</option>
+          <option value="online">Online Banking</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-primary" id="fPay" style="flex:2">支付并下单</button>
+        <button class="btn btn-ghost" id="fCancel" style="flex:1">取消</button>
+      </div>
+    `);
+
+    document.querySelectorAll("button[data-plus]").forEach(btn=>{
+      btn.onclick=()=>{
+        const idx=Number(btn.getAttribute("data-plus"));
+        state.food.cart[idx].qty += 1;
+        openFoodCheckoutSheet();
+      };
+    });
+    document.querySelectorAll("button[data-minus]").forEach(btn=>{
+      btn.onclick=()=>{
+        const idx=Number(btn.getAttribute("data-minus"));
+        state.food.cart[idx].qty = Math.max(0, state.food.cart[idx].qty - 1);
+        state.food.cart = state.food.cart.filter(x=>x.qty>0);
+        if(state.food.cart.length===0){
+          toast("购物车空了","已取消本次下单。");
+          closeSheet();
+          return;
+        }
+        openFoodCheckoutSheet();
+      };
+    });
+
+    $("fCancel").onclick=closeSheet;
+    $("fPay").onclick=()=>{
+      const method = document.getElementById("fPayMethod").value;
+      const addr = document.getElementById("fAddr").value.trim() || "Your location (demo)";
+
+      const pricing2 = foodPricing(store, state.food.cart);
+      const itemsSummary = state.food.cart.map(i=>`${i.name}x${i.qty}`).join(", ");
+
+      const order = {
+        id: "FOOD-" + Math.random().toString(16).slice(2,8).toUpperCase() + "-" + Date.now().toString().slice(-5),
+        createdAt: new Date().toISOString(),
+        storeId: store.id,
+        storeName: store.name,
+        addr,
+        itemsCount: state.food.cart.reduce((s,i)=>s+i.qty,0),
+        itemsSummary,
+        etaMin: store.etaMin,
+        total: pricing2.total,
+        method,
+        status: "PAID"
+      };
+
+      saveFoodOrder(order);
+
+      openSheet("外卖收据", `
+        <div class="empty" style="border-style:solid">
+          <b>下单成功（模拟）</b><br/>
+          订单号：<b>${escapeHTML(order.id)}</b><br/>
+          店铺：${escapeHTML(order.storeName)}<br/>
+          商品：${escapeHTML(order.itemsSummary)}<br/>
+          送达：${escapeHTML(order.addr)}<br/>
+          合计：<b>RM ${order.total.toFixed(2)}</b>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-hot" id="moreFood" style="flex:1">再点一单</button>
+          <button class="btn btn-ghost" id="seeOrders" style="flex:1">看订单</button>
+        </div>
+      `);
+
+      $("moreFood").onclick=()=>{ closeSheet(); location.hash="#/food"; };
+      $("seeOrders").onclick=()=>{ closeSheet(); location.hash="#/orders"; };
+    };
+  }
+
+  /* -------- Orders Page (NEW) -------- */
+  function renderOrders(){
+    setTop("Orders","停车 + 外卖订单（合并）");
+    setActiveTab("orders");
+
+    const pOrders = loadLS(LS_ORDERS);
+    const fOrders = loadLS(LS_FOOD);
+
+    view.innerHTML = `
+      <div class="card">
+        <div class="card-h">
+          <h2>订单中心</h2>
+          <small>全部保存在本地（localStorage）</small>
+        </div>
+        <div class="card-b">
+
+          <div class="item">
+            <div class="left">
+              <div class="name">停车订单</div>
+              <div class="meta">
+                <span class="badge ok">${pOrders.length} 单</span>
+                <span>可一键导航</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="btn btn-ghost" id="openPList">打开</button>
+            </div>
+          </div>
+
+          <div class="item">
+            <div class="left">
+              <div class="name">外卖订单</div>
+              <div class="meta">
+                <span class="badge ok">${fOrders.length} 单</span>
+                <span>可查看收据</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center">
+              <button class="btn btn-ghost" id="openFList">打开</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="row">
+            <button class="btn btn-danger" id="clearAll" style="flex:1">清空全部</button>
+            <button class="btn btn-primary" id="goParkingFromOrders" style="flex:1">去预约</button>
+          </div>
+
+          <p class="hint">作业写法：订单模块展示“支付后生成收据 + 可管理订单”。</p>
+        </div>
+      </div>
+    `;
+
+    $("openPList").onclick=()=>openParkingOrdersSheet();
+    $("openFList").onclick=()=>openFoodOrdersSheet();
+    $("goParkingFromOrders").onclick=()=>location.hash="#/parking";
+
+    $("clearAll").onclick=()=>{
+      if(confirm("确定清空全部订单（停车+外卖）？")){
+        saveLS(LS_ORDERS, []);
+        saveLS(LS_FOOD, []);
+        toast("已清空","全部订单已删除。");
+        renderOrders();
+      }
+    };
+  }
+
+  /* -------- Sheets: order lists -------- */
+  function openParkingOrdersSheet(){
+    const orders=loadLS(LS_ORDERS);
+    if(orders.length===0){
+      openSheet("停车订单", `<div class="empty">还没有停车订单。去“停车”页预约一次就有了。</div>`);
+      return;
+    }
+    const list = orders.slice(0,10).map(o=>`
+      <div class="item">
+        <div class="left">
+          <div class="name">${escapeHTML(o.spotName)}</div>
+          <div class="meta">
+            <span class="badge ok">${escapeHTML(o.status)}</span>
+            <span class="badge">${escapeHTML(o.id)}</span>
+            <span>${fmtDT(new Date(o.start))} → ${fmtDT(new Date(o.end))}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+          <div class="price">RM ${o.total.toFixed(2)}</div>
+          <button class="btn btn-ghost" data-pnav="${escapeHTML(o.id)}">导航</button>
+        </div>
+      </div>
+    `).join("");
+
+    openSheet("停车订单（最近 10 单）", `
+      <div class="list">${list}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-danger" id="clearP" style="flex:1">清空</button>
+        <button class="btn btn-primary" id="goP" style="flex:1">去预约</button>
+      </div>
+    `);
+
+    document.querySelectorAll("button[data-pnav]").forEach(btn=>{
+      btn.onclick=()=>{
+        const id=btn.getAttribute("data-pnav");
+        const o=loadLS(LS_ORDERS).find(x=>x.id===id);
+        if(o) openNavigationTo(`${o.spotName} ${o.addr}`);
+      };
+    });
+
+    $("goP").onclick=()=>{ closeSheet(); location.hash="#/parking"; };
+    $("clearP").onclick=()=>{
+      if(confirm("确定清空所有停车订单？")){
+        saveLS(LS_ORDERS, []);
+        toast("已清空","停车订单已删除。");
+        closeSheet();
+      }
+    };
+  }
+
+  function openFoodOrdersSheet(){
+    const orders=loadLS(LS_FOOD);
+    if(orders.length===0){
+      openSheet("外卖订单", `<div class="empty">还没有外卖订单。去“外卖”页下单一次就有了。</div>`);
+      return;
+    }
+    const list = orders.slice(0,10).map(o=>`
+      <div class="item">
+        <div class="left">
+          <div class="name">${escapeHTML(o.storeName)}</div>
+          <div class="meta">
+            <span class="badge ok">${escapeHTML(o.status)}</span>
+            <span class="badge">${escapeHTML(o.id)}</span>
+            <span>${o.itemsCount} 件 • 预计 ${o.etaMin} 分钟</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;justify-content:center">
+          <div class="price">RM ${o.total.toFixed(2)}</div>
+          <button class="btn btn-ghost" data-fview="${escapeHTML(o.id)}">查看</button>
+        </div>
+      </div>
+    `).join("");
+
+    openSheet("外卖订单（最近 10 单）", `
+      <div class="list">${list}</div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-danger" id="clearF" style="flex:1">清空</button>
+        <button class="btn btn-hot" id="goF" style="flex:1">再点一单</button>
+      </div>
+    `);
+
+    document.querySelectorAll("button[data-fview]").forEach(btn=>{
+      btn.onclick=()=>{
+        const id=btn.getAttribute("data-fview");
+        const o=loadLS(LS_FOOD).find(x=>x.id===id);
+        if(!o) return;
+        openSheet("外卖收据", `
+          <div class="empty" style="border-style:solid">
+            <b>订单号：</b>${escapeHTML(o.id)}<br/>
+            <b>店铺：</b>${escapeHTML(o.storeName)}<br/>
+            <b>送达：</b>${escapeHTML(o.addr)}<br/>
+            <b>商品：</b>${escapeHTML(o.itemsSummary)}<br/>
+            <b>合计：</b>RM ${o.total.toFixed(2)}
+          </div>
+        `);
+      };
+    });
+
+    $("goF").onclick=()=>{ closeSheet(); location.hash="#/food"; };
+    $("clearF").onclick=()=>{
+      if(confirm("确定清空所有外卖订单？")){
+        saveLS(LS_FOOD, []);
+        toast("已清空","外卖订单已删除。");
+        closeSheet();
+      }
+    };
+  }
+
+  /* ------------------- Router ------------------- */
+  function route(){
+    const hash=location.hash||"#/home";
+    const path=hash.replace("#","");
+    if(path.startsWith("/home")) return renderHome();
+    if(path.startsWith("/parking")) return renderParking();
+    if(path.startsWith("/map")) return renderMap();
+    if(path.startsWith("/food")) return renderFood();
+    if(path.startsWith("/orders")) return renderOrders();
+    location.hash="#/home";
+  }
+  window.addEventListener("hashchange", route);
+
+  (function init(){
+    if(!location.hash) location.hash="#/home";
+    route();
+  })();
+</script>
+</body>
+</html>
